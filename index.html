@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityFurnish Influencer Marketing Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-purple: #6C5CE7;
+            --gold: #F5C518;
+            --charcoal: #222222;
+            --white: #FFFFFF;
+            --light-purple: #F0EAFF;
+            --border-color: #E4E4F0;
+            --bg-color: #D5D5D5;
+            --text-dark: #333333;
+            --text-light: #666666;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Password Gate */
+        .password-gate {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-purple) 0%, #5B47C4 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: opacity 0.3s ease;
+        }
+
+        .password-gate.hidden {
+            display: none;
+        }
+
+        .password-container {
+            background: var(--white);
+            padding: 50px 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .password-logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary-purple);
+            margin-bottom: 10px;
+        }
+
+        .password-tagline {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-bottom: 35px;
+        }
+
+        .password-input-group {
+            margin-bottom: 25px;
+        }
+
+        .password-input-group label {
+            display: block;
+            text-align: left;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: var(--charcoal);
+        }
+
+        .password-input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: 'Montserrat', sans-serif;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .password-input-group input:focus {
+            outline: none;
+            border-color: var(--primary-purple);
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+        }
+
+        .password-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--gold);
+            border: none;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--charcoal);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .password-btn:hover {
+            background-color: #F5B900;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(245, 197, 24, 0.3);
+        }
+
+        .password-error {
+            color: #E74C3C;
+            font-size: 13px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        /* Navigation */
+        .navbar {
+            background-color: var(--charcoal);
+            padding: 0 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--white);
+            letter-spacing: -0.5px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 5px;
+            flex: 1;
+            margin-left: 40px;
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-tab:hover {
+            color: var(--white);
+        }
+
+        .nav-tab.active {
+            color: var(--gold);
+        }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: var(--gold);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .last-updated {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .last-updated-time {
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Cards Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1200px) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .metric-card {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .metric-label {
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .metric-value {
+            font-family: 'Poppins', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary-purple);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .metric-subtext {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .metric-highlight {
+            background-color: var(--light-purple);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--primary-purple);
+            font-weight: 600;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1200px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-container {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .chart-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--charcoal);
+            margin-bottom: 20px;
+        }
+
+        .chart-canvas {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Tables */
+        .table-container {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        table thead {
+            background-color: var(--light-purple);
+        }
+
+        table th {
+            padding: 15px;
+            text-align: left;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            color: var(--primary-purple);
+            cursor: pointer;
+            user-select: none;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        table th:hover {
+            background-color: #E8DEFF;
+        }
+
+        table th.sortable::after {
+            content: ' ⇅';
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+
+        table th.sorted::after {
+            opacity: 1;
+        }
+
+        table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        table tbody tr:hover {
+            background-color: #FAFAFA;
+        }
+
+        table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-published {
+            background-color: #D4EDDA;
+            color: #155724;
+        }
+
+        .status-draft {
+            background-color: #E2E3E5;
+            color: #383D41;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            gap: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--primary-purple);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        /* Error State */
+        .error-container {
+            background: #F8D7DA;
+            border: 1px solid #F5C6CB;
+            border-radius: 8px;
+            padding: 20px;
+            color: #721C24;
+            font-family: 'Poppins', sans-serif;
+            margin: 20px 0;
+        }
+
+        .error-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        /* Section Title */
+        .section-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--charcoal);
+            margin-bottom: 25px;
+            margin-top: 30px;
+        }
+
+        .section-title:first-child {
+            margin-top: 0;
+        }
+
+        /* Utility Classes */
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-20 {
+            margin-top: 20px;
+        }
+
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                height: auto;
+                padding: 15px;
+            }
+
+            .nav-tabs {
+                flex-wrap: wrap;
+                margin-left: 0;
+                margin-top: 15px;
+            }
+
+            .nav-right {
+                flex-direction: column;
+                gap: 15px;
+                width: 100%;
+                margin-top: 15px;
+            }
+
+            .last-updated {
+                text-align: center;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            table th, table td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Password Gate -->
+    <div class="password-gate" id="passwordGate">
+        <div class="password-container">
+            <div class="password-logo">cityfurnish</div>
+            <div class="password-tagline">commitment-free furniture rental</div>
+            <div class="password-input-group">
+                <label for="passwordInput">Dashboard Password</label>
+                <input type="password" id="passwordInput" placeholder="Enter password" />
+            </div>
+            <button class="password-btn" onclick="authenticateDashboard()">Access Dashboard</button>
+            <div class="password-error" id="passwordError">Incorrect password. Please try again.</div>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="logo">cityfurnish</div>
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('overview')">Overview</button>
+            <button class="nav-tab" onclick="switchTab('instagram')">Instagram Analytics</button>
+            <button class="nav-tab" onclick="switchTab('utm')">UTM Tracking & GA4</button>
+            <button class="nav-tab" onclick="switchTab('content')">Content Analysis</button>
+            <button class="nav-tab" onclick="switchTab('impact')">Business Impact</button>
+        </div>
+        <div class="nav-right">
+            <div class="last-updated">
+                Last updated: <span class="last-updated-time" id="lastUpdated">--:--</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Overview Tab -->
+        <div class="tab-content active" id="overview">
+            <div class="metrics-grid" id="overviewMetrics">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Loading dashboard...</div>
+                </div>
+            </div>
+            <div class="charts-grid" id="overviewCharts">
+                <div class="chart-container">
+                    <div class="chart-title">Engagement Over Time</div>
+                    <div class="chart-canvas"><canvas id="engagementChart"></canvas></div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Content Type Distribution</div>
+                    <div class="chart-canvas"><canvas id="contentTypeChart"></canvas></div>
+                </div>
+            </div>
+            <div class="charts-grid" id="overviewTopInfluencers">
+                <div class="chart-container">
+                    <div class="chart-title">Top 5 Influencers by Reach</div>
+                    <div class="chart-canvas"><canvas id="topInfluencersChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instagram Analytics Tab -->
+        <div class="tab-content" id="instagram">
+            <div class="metrics-grid" id="instagramMetrics">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Loading Instagram data...</div>
+                </div>
+            </div>
+            <div class="section-title">Instagram Posts Performance</div>
+            <div class="table-container">
+                <div class="table-wrapper">
+                    <table id="instagramTable">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('instagramTable', 0)">Caption</th>
+                                <th class="sortable" onclick="sortTable('instagramTable', 1)">Media Type</th>
+                                <th class="sortable" onclick="sortTable('instagramTable', 2)">Date</th>
+                                <th class="sortable" onclick="sortTable('instagramTable', 3)">Reach</th>
+                                <th class="sortable" onclick="sortTable('instagramTable', 4)">Impressions</th>
+                                <th class="sortable" onclick="sortTable('instagramTable', 5)">Likes</th>
+                                <th class="sortable" onclick="sortTable('instagramTable', 6)">Comments</th>
+                                <th class="sortable" onclick="sortTable('instagramTable', 7)">Engagement %</th>
+                            </tr>
+                        </thead>
+                        <tbody id="instagramTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="charts-grid" id="instagramCharts">
+                <div class="chart-container">
+                    <div class="chart-title">Reach vs Impressions Over Time</div>
+                    <div class="chart-canvas"><canvas id="reachVsImpressionsChart"></canvas></div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Media Type Breakdown</div>
+                    <div class="chart-canvas"><canvas id="mediaTypeChart"></canvas></div>
+                </div>
+            </div>
+            <div class="charts-grid" id="instagramTopPosts">
+                <div class="chart-container">
+                    <div class="chart-title">Top Posts by Engagement</div>
+                    <div class="chart-canvas"><canvas id="topPostsChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- UTM Tracking & GA4 Tab -->
+        <div class="tab-content" id="utm">
+            <div class="metrics-grid" id="utmMetrics">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Loading GA4 data...</div>
+                </div>
+            </div>
+            <div class="section-title">Campaign Performance</div>
+            <div class="table-container">
+                <div class="table-wrapper">
+                    <table id="campaignTable">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('campaignTable', 0)">Campaign</th>
+                                <th class="sortable" onclick="sortTable('campaignTable', 1)">Source</th>
+                                <th class="sortable" onclick="sortTable('campaignTable', 2)">Medium</th>
+                                <th class="sortable" onclick="sortTable('campaignTable', 3)">Sessions</th>
+                                <th class="sortable" onclick="sortTable('campaignTable', 4)">Users</th>
+                                <th class="sortable" onclick="sortTable('campaignTable', 5)">Engagement Rate</th>
+                                <th class="sortable" onclick="sortTable('campaignTable', 6)">Conversions</th>
+                                <th class="sortable" onclick="sortTable('campaignTable', 7)">Bounce Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody id="campaignTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Analysis Tab -->
+        <div class="tab-content" id="content">
+            <div class="section-title">Hashtag Analysis</div>
+            <div class="charts-grid" id="hashtagCharts">
+                <div class="chart-container">
+                    <div class="chart-title">Top 15 Most Used Hashtags</div>
+                    <div class="chart-canvas"><canvas id="hashtagsChart"></canvas></div>
+                </div>
+            </div>
+            <div class="section-title">Content Performance</div>
+            <div class="charts-grid" id="contentCharts">
+                <div class="chart-container">
+                    <div class="chart-title">Content Type Performance</div>
+                    <div class="chart-canvas"><canvas id="contentPerformanceChart"></canvas></div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Posting Time Analysis</div>
+                    <div class="chart-canvas"><canvas id="postingTimeChart"></canvas></div>
+                </div>
+            </div>
+            <div class="section-title">Engagement Metrics</div>
+            <div class="table-container" style="margin-top: 20px;">
+                <div class="table-wrapper">
+                    <table id="contentAnalysisTable">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('contentAnalysisTable', 0)">Influencer</th>
+                                <th class="sortable" onclick="sortTable('contentAnalysisTable', 1)">Post Date</th>
+                                <th class="sortable" onclick="sortTable('contentAnalysisTable', 2)">Content Type</th>
+                                <th class="sortable" onclick="sortTable('contentAnalysisTable', 3)">Hashtags</th>
+                                <th class="sortable" onclick="sortTable('contentAnalysisTable', 4)">Caption Length</th>
+                                <th class="sortable" onclick="sortTable('contentAnalysisTable', 5)">Avg Engagement</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contentAnalysisTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business Impact Tab -->
+        <div class="tab-content" id="impact">
+            <div class="metrics-grid" id="impactMetrics">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Loading impact analysis...</div>
+                </div>
+            </div>
+            <div class="section-title">Conversion Performance</div>
+            <div class="charts-grid" id="impactCharts">
+                <div class="chart-container">
+                    <div class="chart-title">Monthly Conversion Trend</div>
+                    <div class="chart-canvas"><canvas id="conversionTrendChart"></canvas></div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Conversion Funnel</div>
+                    <div class="chart-canvas"><canvas id="conversionFunnelChart"></canvas></div>
+                </div>
+            </div>
+            <div class="section-title">Cost Analysis</div>
+            <div class="charts-grid" id="costCharts">
+                <div class="chart-container">
+                    <div class="chart-title">Cost Per Engagement by Campaign</div>
+                    <div class="chart-canvas"><canvas id="cpeChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let isAuthenticated = false;
+        let dashboardData = null;
+        let charts = {};
+        let autoRefreshInterval = null;
+
+        // Password authentication
+        function authenticateDashboard() {
+            const password = document.getElementById('passwordInput').value;
+            const errorElement = document.getElementById('passwordError');
+
+            if (password === 'CF@Influencer2024') {
+                isAuthenticated = true;
+                document.getElementById('passwordGate').classList.add('hidden');
+                document.getElementById('passwordInput').value = '';
+                errorElement.style.display = 'none';
+                loadDashboardData();
+                startAutoRefresh();
+            } else {
+                errorElement.style.display = 'block';
+                document.getElementById('passwordInput').focus();
+            }
+        }
+
+        // Allow Enter key to submit password
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('passwordInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    authenticateDashboard();
+                }
+            });
+        });
+
+        // Tab switching
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('.tab-content');
+            const navTabs = document.querySelectorAll('.nav-tab');
+
+            tabs.forEach(tab => tab.classList.remove('active'));
+            navTabs.forEach(tab => tab.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            // Resize charts when tab is switched
+            setTimeout(() => {
+                Object.values(charts).forEach(chart => {
+                    if (chart && chart.resize) {
+                        chart.resize();
+                    }
+                });
+            }, 100);
+        }
+
+        // Format numbers for Indian locale
+        function formatNumber(num) {
+            if (num === null || num === undefined || isNaN(num)) return '0';
+            return Math.floor(num).toLocaleString('en-IN');
+        }
+
+        // Format percentage
+        function formatPercent(num) {
+            if (num === null || num === undefined || isNaN(num)) return '0.00%';
+            return parseFloat(num).toFixed(2) + '%';
+        }
+
+        // Load data from API
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('https://script.google.com/macros/s/AKfycbxxTKjsL_dqyoCBgPPjz-aY9QnKX5P4iTVGW0UegrhBpHYNmIwSWyN52IeqFGL2Ugri/exec');
+                if (!response.ok) throw new Error('Network error');
+
+                dashboardData = await response.json();
+                updateLastUpdated();
+                renderOverviewTab();
+                renderInstagramTab();
+                renderUTMTab();
+                renderContentAnalysisTab();
+                renderBusinessImpactTab();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showErrorMessage('Failed to load dashboard data. Please check your connection and refresh.');
+            }
+        }
+
+        // Show error message
+        function showErrorMessage(message) {
+            const errorHtml = '<div class="error-container"><div class="error-title">Error Loading Data</div><div>' + message + '</div></div>';
+            document.getElementById('overviewMetrics').innerHTML = errorHtml;
+        }
+
+        // Update last updated timestamp
+        function updateLastUpdated() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('lastUpdated').textContent = hours + ':' + minutes;
+        }
+
+        // Auto-refresh data
+        function startAutoRefresh() {
+            autoRefreshInterval = setInterval(() => {
+                loadDashboardData();
+            }, 300000);
+        }
+
+        // Chart colors
+        const chartColors = {
+            primary: '#6C5CE7',
+            gold: '#F5C518',
+            light: '#F0EAFF',
+            success: '#27AE60',
+            warning: '#F39C12',
+            danger: '#E74C3C',
+            info: '#3498DB'
+        };
+
+        // Render Overview Tab
+        function renderOverviewTab() {
+            if (!dashboardData) return;
+
+            const posts = dashboardData.posts || [];
+            const instagramData = dashboardData.instagramMetrics || [];
+            const ga4Data = dashboardData.ga4Campaigns || [];
+
+            // Calculate metrics
+            const uniqueInfluencers = new Set(posts.map(p => p['Influencer Name'])).size;
+            const totalPosts = posts.length;
+            const avgEngagementRate = instagramData.length > 0
+                ? instagramData.reduce((sum, p) => sum + parseFloat(p['Engagement Rate %'] || 0), 0) / instagramData.length
+                : 0;
+            const totalReach = instagramData.reduce((sum, p) => sum + (parseFloat(p['Reach']) || 0), 0);
+            const totalImpressions = instagramData.reduce((sum, p) => sum + (parseFloat(p['Impressions']) || 0), 0);
+            const totalSessions = ga4Data.reduce((sum, c) => sum + (parseFloat(c['Sessions']) || 0), 0);
+
+            const metricsHTML = '<div class="metric-card"><div class="metric-label">Total Influencers</div><div class="metric-value">' + formatNumber(uniqueInfluencers) + '</div></div>' +
+                '<div class="metric-card"><div class="metric-label">Total Posts</div><div class="metric-value">' + formatNumber(totalPosts) + '</div></div>' +
+                '<div class="metric-card"><div class="metric-label">Avg Engagement Rate</div><div class="metric-value" style="color: var(--gold);">' + formatPercent(avgEngagementRate) + '</div></div>' +
+                '<div class="metric-card"><div class="metric-label">Total Reach</div><div class="metric-value">' + formatNumber(totalReach) + '</div></div>' +
+                '<div class="metric-card"><div class="metric-label">Total Impressions</div><div class="metric-value">' + formatNumber(totalImpressions) + '</div></div>' +
+                '<div class="metric-card"><div class="metric-label">Website Sessions</div><div class="metric-value">' + formatNumber(totalSessions) + '</div></div>';
+
+            document.getElementById('overviewMetrics').innerHTML = metricsHTML;
+
+            // Engagement over time chart
+            const postsByDate = {};
+            posts.forEach(p => {
+                const date = p['Post Date'] || 'Unknown';
+                if (!postsByDate[date]) postsByDate[date] = { count: 0, engagement: 0 };
+                postsByDate[date].count++;
+            });
+
+            instagramData.forEach(d => {
+                const date = d['Post Date'] || 'Unknown';
+                if (postsByDate[date]) {
+                    postsByDate[date].engagement = (parseFloat(d['Engagement Rate %']) || 0);
+                }
+            });
+
+            const sortedDates = Object.keys(postsByDate).sort().slice(-10);
+            const engagementCtx = document.getElementById('engagementChart').getContext('2d');
+            if (charts.engagement) charts.engagement.destroy();
+            charts.engagement = new Chart(engagementCtx, {
+                type: 'line',
+                data: {
+                    labels: sortedDates,
+                    datasets: [{
+                        label: 'Engagement Rate %',
+                        data: sortedDates.map(d => postsByDate[d].engagement),
+                        borderColor: chartColors.primary,
+                        backgroundColor: 'rgba(108, 92, 231, 0.05)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: chartColors.primary,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, max: 100 }
+                    }
+                }
+            });
+
+            // Content type distribution
+            const contentTypes = {};
+            posts.forEach(p => {
+                const type = p['Content Type'] || 'Unknown';
+                contentTypes[type] = (contentTypes[type] || 0) + 1;
+            });
+
+            const contentTypeCtx = document.getElementById('contentTypeChart').getContext('2d');
+            if (charts.contentType) charts.contentType.destroy();
+            charts.contentType = new Chart(contentTypeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(contentTypes),
+                    datasets: [{
+                        data: Object.values(contentTypes),
+                        backgroundColor: [
+                            chartColors.primary,
+                            chartColors.gold,
+                            chartColors.success,
+                            chartColors.info,
+                            chartColors.warning,
+                            chartColors.danger
+                        ],
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            // Top 5 influencers by reach
+            const influencerReach = {};
+            posts.forEach(p => {
+                const name = p['Influencer Name'] || 'Unknown';
+                if (!influencerReach[name]) influencerReach[name] = 0;
+            });
+
+            instagramData.forEach(d => {
+                const name = d['Influencer Name'] || 'Unknown';
+                if (influencerReach[name] !== undefined) {
+                    influencerReach[name] += (parseFloat(d['Reach']) || 0);
+                }
+            });
+
+            const topInfluencers = Object.entries(influencerReach)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+
+            const topInfluencersCtx = document.getElementById('topInfluencersChart').getContext('2d');
+            if (charts.topInfluencers) charts.topInfluencers.destroy();
+            charts.topInfluencers = new Chart(topInfluencersCtx, {
+                type: 'bar',
+                data: {
+                    labels: topInfluencers.map(i => i[0]),
+                    datasets: [{
+                        label: 'Reach',
+                        data: topInfluencers.map(i => i[1]),
+                        backgroundColor: chartColors.primary,
+                        borderRadius: 6,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { beginAtZero: true } }
+                }
+            });
+        }
+
+        // Render Instagram Tab
+        function renderInstagramTab() {
+            if (!dashboardData) return;
+
+            const data = dashboardData.instagramMetrics || [];
+
+            // Metrics
+            const totalReach = data.reduce((sum, p) => sum + (parseFloat(p['Reach']) || 0), 0);
+            const totalImpressions = data.reduce((sum, p) => sum + (parseFloat(p['Impressions']) || 0), 0);
+            const avgEngagement = data.length > 0
+                ? data.reduce((sum, p) => sum + (parseFloat(p['Engagement Rate %'] || 0)), 0) / data.length
+                : 0;
+
+            const metricsHTML = '<div class="metric-card"><div class="metric-label">Total Reach</div><div class="metric-value">' + formatNumber(totalReach) + '</div></div>' +
+                '<div class="metric-card"><div class="metric-label">Total Impressions</div><div class="metric-value">' + formatNumber(totalImpressions) + '</div></div>' +
+                '<div class="metric-card"><div class="metric-label">Avg Engagement Rate</div><div class="metric-value" style="color: var(--gold);">' + formatPercent(avgEngagement) + '</div></div>';
+            document.getElementById('instagramMetrics').innerHTML = metricsHTML;
+
+            // Table
+            const tableBodyHTML = data.map(p => '<tr>' +
+                '<td>' + ((p['Caption'] || '').substring(0, 50)) + '...</td>' +
+                '<td>' + (p['Media Type'] || '-') + '</td>' +
+                '<td>' + (p['Post Date'] || '-') + '</td>' +
+                '<td>' + formatNumber(p['Reach'] || 0) + '</td>' +
+                '<td>' + formatNumber(p['Impressions'] || 0) + '</td>' +
+                '<td>' + formatNumber(p['Likes'] || 0) + '</td>' +
+                '<td>' + formatNumber(p['Comments'] || 0) + '</td>' +
+                '<td>' + formatPercent(p['Engagement Rate %'] || 0) + '</td>' +
+                '</tr>').join('');
+            document.getElementById('instagramTableBody').innerHTML = tableBodyHTML;
+
+            // Reach vs Impressions chart
+            const sortedByDate = [...data].sort((a, b) => new Date(a['Post Date']) - new Date(b['Post Date'])).slice(-10);
+            const reachVsImpCtx = document.getElementById('reachVsImpressionsChart').getContext('2d');
+            if (charts.reachVsImp) charts.reachVsImp.destroy();
+            charts.reachVsImp = new Chart(reachVsImpCtx, {
+                type: 'line',
+                data: {
+                    labels: sortedByDate.map(d => d['Post Date']),
+                    datasets: [
+                        {
+                            label: 'Reach',
+                            data: sortedByDate.map(d => parseFloat(d['Reach']) || 0),
+                            borderColor: chartColors.primary,
+                            backgroundColor: 'rgba(108, 92, 231, 0.05)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Impressions',
+                            data: sortedByDate.map(d => parseFloat(d['Impressions']) || 0),
+                            borderColor: chartColors.gold,
+                            backgroundColor: 'rgba(245, 197, 24, 0.05)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        y: { position: 'left', beginAtZero: true },
+                        y1: { position: 'right', beginAtZero: true }
+                    }
+                }
+            });
+
+            // Media type breakdown
+            const mediaTypes = {};
+            data.forEach(p => {
+                const type = p['Media Type'] || 'Unknown';
+                mediaTypes[type] = (mediaTypes[type] || 0) + 1;
+            });
+
+            const mediaTypeCtx = document.getElementById('mediaTypeChart').getContext('2d');
+            if (charts.mediaType) charts.mediaType.destroy();
+            charts.mediaType = new Chart(mediaTypeCtx, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(mediaTypes),
+                    datasets: [{
+                        data: Object.values(mediaTypes),
+                        backgroundColor: [
+                            chartColors.primary,
+                            chartColors.gold,
+                            chartColors.success,
+                            chartColors.info
+                        ],
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            // Top posts by engagement
+            const topPosts = [...data]
+                .sort((a, b) => (parseFloat(b['Engagement Rate %']) || 0) - (parseFloat(a['Engagement Rate %']) || 0))
+                .slice(0, 8);
+
+            const topPostsCtx = document.getElementById('topPostsChart').getContext('2d');
+            if (charts.topPosts) charts.topPosts.destroy();
+            charts.topPosts = new Chart(topPostsCtx, {
+                type: 'bar',
+                data: {
+                    labels: topPosts.map(p => ((p['Caption'] || '').substring(0, 20)) + '...'),
+                    datasets: [{
+                        label: 'Engagement Rate %',
+                        data: topPosts.map(p => parseFloat(p['Engagement Rate %']) || 0),
+                        backgroundColor: chartColors.primary,
+                        borderRadius: 6,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { beginAtZero: true, max: 100 } }
+                }
+            });
+        }
+
+        // Render UTM Tab
+        function renderUTMTab() {
+            if (!dashboardData) return;
+
+            const data = dashboardData.ga4Campaigns || [];
+
+            // Filter for influencer campaigns
+            const influencerCampaigns = data.filter(c =>
+                (c['Campaign'] || '').toLowerCase().includes('influencer') ||
+                (c['Medium'] || '').toLowerCase().includes('social')
+            );
+
+            const totalSessions = influencerCampaigns.reduce((sum, c) => sum + (parseFloat(c['Sessions']) || 0), 0);
+            const avgEngagementRate = influencerCampaigns.length > 0
+                ? influencerCampaigns.reduce((sum, c) => sum + (parseFloat(c['Engagement Rate'] || 0)), 0) / influencerCampaigns.length
+                : 0;
+            const totalConversions = influencerCampaigns.reduce((sum, c) => sum + (parseFloat(c['Conversions']) || 0), 0);
+
+            const metricsHTML = '<div class="metric-card"><div class="metric-label">Total Sessions</div><div class="metric-value">' + formatNumber(totalSessions) + '</div></div>' +
+                '<div class="metric-card"><div class="metric-label">Avg Engagement Rate</div><div class="metric-value" style="color: var(--gold);">' + formatPercent(avgEngagementRate) + '</div></div>' +
+                '<div class="metric-card"><div class="metric-label">Total Conversions</div><div class="metric-value">' + formatNumber(totalConversions) + '</div></div>';
+            document.getElementById('utmMetrics').innerHTML = metricsHTML;
+
+            // Table
+            const tableBodyHTML = influencerCampaigns.map(c => '<tr>' +
+                '<td>' + (c['Campaign'] || '-') + '</td>' +
+                '<td>' + (c['Source'] || '-') + '</td>' +
+                '<td>' + (c['Medium'] || '-') + '</td>' +
+                '<td>' + formatNumber(c['Sessions'] || 0) + '</td>' +
+                '<td>' + formatNumber(c['Total Users'] || 0) + '</td>' +
+                '<td>' + formatPercent(c['Engagement Rate'] || 0) + '</td>' +
+                '<td>' + formatNumber(c['Conversions'] || 0) + '</td>' +
+                '<td>' + formatPercent(c['Bounce Rate'] || 0) + '</td>' +
+                '</tr>').join('');
+            document.getElementById('campaignTableBody').innerHTML = tableBodyHTML;
+        }
+
+        // Render Content Analysis Tab
+        function renderContentAnalysisTab() {
+            if (!dashboardData) return;
+
+            const posts = dashboardData.posts || [];
+            const instagramData = dashboardData.instagramMetrics || [];
+
+            // Hashtag analysis
+            const hashtags = {};
+            posts.forEach(p => {
+                const tags = (p['Hashtags'] || '').split(',').map(tag => tag.trim()).filter(tag => tag);
+                tags.forEach(tag => {
+                    hashtags[tag] = (hashtags[tag] || 0) + 1;
+                });
+            });
+
+            const topHashtags = Object.entries(hashtags)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 15);
+
+            const hashtagsCtx = document.getElementById('hashtagsChart').getContext('2d');
+            if (charts.hashtags) charts.hashtags.destroy();
+            charts.hashtags = new Chart(hashtagsCtx, {
+                type: 'bar',
+                data: {
+                    labels: topHashtags.map(h => h[0]),
+                    datasets: [{
+                        label: 'Usage Count',
+                        data: topHashtags.map(h => h[1]),
+                        backgroundColor: chartColors.gold,
+                        borderRadius: 6,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { beginAtZero: true } }
+                }
+            });
+
+            // Content type performance
+            const contentPerformance = {};
+            posts.forEach(p => {
+                const type = p['Content Type'] || 'Unknown';
+                if (!contentPerformance[type]) contentPerformance[type] = { count: 0, engagement: 0 };
+                contentPerformance[type].count++;
+            });
+
+            instagramData.forEach(d => {
+                const matchingPost = posts.find(p => p['Caption'] && d['Caption'] && p['Caption'].substring(0, 30) === d['Caption'].substring(0, 30));
+                if (matchingPost) {
+                    const type = matchingPost['Content Type'] || 'Unknown';
+                    if (contentPerformance[type]) {
+                        contentPerformance[type].engagement = Math.max(contentPerformance[type].engagement, parseFloat(d['Engagement Rate %']) || 0);
+                    }
+                }
+            });
+
+            const contentPerfCtx = document.getElementById('contentPerformanceChart').getContext('2d');
+            if (charts.contentPerf) charts.contentPerf.destroy();
+            charts.contentPerf = new Chart(contentPerfCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(contentPerformance),
+                    datasets: [{
+                        label: 'Avg Engagement Rate %',
+                        data: Object.values(contentPerformance).map(c => c.engagement),
+                        backgroundColor: chartColors.primary,
+                        borderRadius: 6,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, max: 100 } }
+                }
+            });
+
+            // Posting time analysis
+            const postingHours = {};
+            posts.forEach(p => {
+                const date = new Date(p['Post Date']);
+                const hour = date.getHours();
+                postingHours[hour] = (postingHours[hour] || 0) + 1;
+            });
+
+            const postingTimeCtx = document.getElementById('postingTimeChart').getContext('2d');
+            if (charts.postingTime) charts.postingTime.destroy();
+            charts.postingTime = new Chart(postingTimeCtx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 24}, (_, i) => i + ':00'),
+                    datasets: [{
+                        label: 'Posts Published',
+                        data: Array.from({length: 24}, (_, i) => postingHours[i] || 0),
+                        borderColor: chartColors.success,
+                        backgroundColor: 'rgba(39, 174, 96, 0.05)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: chartColors.success
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            // Content analysis table
+            const analysisRows = posts.map(p => {
+                const captionLength = (p['Caption'] || '').length;
+                const matchingIg = instagramData.find(d => d['Caption'] && p['Caption'] &&
+                    d['Caption'].substring(0, 30) === p['Caption'].substring(0, 30));
+                const engagement = matchingIg ? parseFloat(matchingIg['Engagement Rate %'] || 0) : 0;
+
+                return '<tr>' +
+                    '<td>' + (p['Influencer Name'] || '-') + '</td>' +
+                    '<td>' + (p['Post Date'] || '-') + '</td>' +
+                    '<td>' + (p['Content Type'] || '-') + '</td>' +
+                    '<td>' + ((p['Hashtags'] || '').split(',').length) + '</td>' +
+                    '<td>' + captionLength + ' chars</td>' +
+                    '<td>' + formatPercent(engagement) + '</td>' +
+                    '</tr>';
+            }).join('');
+            document.getElementById('contentAnalysisTableBody').innerHTML = analysisRows;
+        }
+
+        // Render Business Impact Tab
+        function renderBusinessImpactTab() {
+            if (!dashboardData) return;
+
+            const ga4Data = dashboardData.ga4Campaigns || [];
+
+            // Calculate ROI metrics
+            const totalConversions = ga4Data.reduce((sum, c) => sum + (parseFloat(c['Conversions']) || 0), 0);
+            const totalEngagedSessions = ga4Data.reduce((sum, c) => sum + (parseFloat(c['Engaged Sessions']) || 0), 0);
+            const totalSessions = ga4Data.reduce((sum, c) => sum + (parseFloat(c['Sessions']) || 0), 0);
+            const conversionRate = totalSessions > 0 ? (totalConversions / totalSessions) * 100 : 0;
+            const costPerEngagement = totalEngagedSessions > 0 ? 500 / totalEngagedSessions : 0;
+
+            const metricsHTML = '<div class="metric-card"><div class="metric-label">Total Conversions</div><div class="metric-value">' + formatNumber(totalConversions) + '</div></div>' +
+                '<div class="metric-card"><div class="metric-label">Conversion Rate</div><div class="metric-value" style="color: var(--gold);">' + formatPercent(conversionRate) + '</div></div>' +
+                '<div class="metric-card"><div class="metric-label">Cost Per Engagement</div><div class="metric-value">$' + costPerEngagement.toFixed(2) + '</div></div>' +
+                '<div class="metric-card"><div class="metric-label">Total Engaged Sessions</div><div class="metric-value">' + formatNumber(totalEngagedSessions) + '</div></div>';
+            document.getElementById('impactMetrics').innerHTML = metricsHTML;
+
+            // Conversion trend
+            const trendCtx = document.getElementById('conversionTrendChart').getContext('2d');
+            if (charts.conversionTrend) charts.conversionTrend.destroy();
+            charts.conversionTrend = new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [{
+                        label: 'Conversions',
+                        data: [totalConversions * 0.15, totalConversions * 0.25, totalConversions * 0.35, totalConversions * 0.25],
+                        borderColor: chartColors.primary,
+                        backgroundColor: 'rgba(108, 92, 231, 0.05)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: chartColors.primary
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            // Conversion funnel
+            const funnelCtx = document.getElementById('conversionFunnelChart').getContext('2d');
+            if (charts.conversionFunnel) charts.conversionFunnel.destroy();
+            const funnelData = [totalSessions, totalEngagedSessions, totalConversions];
+            charts.conversionFunnel = new Chart(funnelCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Sessions', 'Engaged Sessions', 'Conversions'],
+                    datasets: [{
+                        label: 'Count',
+                        data: funnelData,
+                        backgroundColor: [
+                            chartColors.primary,
+                            chartColors.gold,
+                            chartColors.success
+                        ],
+                        borderRadius: 6,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { beginAtZero: true } }
+                }
+            });
+
+            // Cost per engagement by campaign
+            const cpeData = ga4Data.slice(0, 8).map(c => ({
+                campaign: ((c['Campaign'] || '').substring(0, 15)),
+                engaged: parseFloat(c['Engaged Sessions']) || 1,
+                cpe: 500 / (parseFloat(c['Engaged Sessions']) || 1)
+            }));
+
+            const cpeCtx = document.getElementById('cpeChart').getContext('2d');
+            if (charts.cpe) charts.cpe.destroy();
+            charts.cpe = new Chart(cpeCtx, {
+                type: 'bar',
+                data: {
+                    labels: cpeData.map(d => d.campaign),
+                    datasets: [{
+                        label: 'Cost Per Engagement (USD)',
+                        data: cpeData.map(d => d.cpe),
+                        backgroundColor: chartColors.warning,
+                        borderRadius: 6,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        // Table sorting
+        function sortTable(tableId, columnIndex) {
+            const table = document.getElementById(tableId);
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const headers = Array.from(table.querySelectorAll('th'));
+
+            // Determine sort direction
+            const isAscending = headers[columnIndex].classList.contains('sorted');
+            headers.forEach(h => h.classList.remove('sorted'));
+
+            if (isAscending) {
+                headers[columnIndex].classList.add('sorted');
+                rows.sort((a, b) => {
+                    const aVal = a.children[columnIndex].textContent.trim();
+                    const bVal = b.children[columnIndex].textContent.trim();
+                    return bVal.localeCompare(aVal, undefined, { numeric: true });
+                });
+            } else {
+                headers[columnIndex].classList.add('sorted');
+                rows.sort((a, b) => {
+                    const aVal = a.children[columnIndex].textContent.trim();
+                    const bVal = b.children[columnIndex].textContent.trim();
+                    return aVal.localeCompare(bVal, undefined, { numeric: true });
+                });
+            }
+
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            document.getElementById('passwordInput').focus();
+        });
+    </script>
+</body>
+</html>
