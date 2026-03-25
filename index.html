@@ -884,13 +884,13 @@
             // Engagement over time chart
             const postsByDate = {};
             posts.forEach(p => {
-                const date = p['Post Date'] || 'Unknown';
+                const date = (p['Post Date'] || 'Unknown').split('T')[0];
                 if (!postsByDate[date]) postsByDate[date] = { count: 0, engagement: 0 };
                 postsByDate[date].count++;
             });
 
             instagramData.forEach(d => {
-                const date = d['Post Date'] || 'Unknown';
+                const date = (d['Post Date'] || 'Unknown').split('T')[0];
                 if (postsByDate[date]) {
                     postsByDate[date].engagement = (parseFloat(d['Engagement Rate %']) || 0);
                 }
@@ -1026,7 +1026,7 @@
             const tableBodyHTML = data.map(p => '<tr>' +
                 '<td>' + ((p['Caption'] || '').substring(0, 50)) + '...</td>' +
                 '<td>' + (p['Media Type'] || '-') + '</td>' +
-                '<td>' + (p['Post Date'] || '-') + '</td>' +
+                '<td>' + ((p['Post Date'] || '-').split('T')[0]) + '</td>' +
                 '<td>' + formatNumber(p['Reach'] || 0) + '</td>' +
                 '<td>' + formatNumber(p['Impressions'] || 0) + '</td>' +
                 '<td>' + formatNumber(p['Likes'] || 0) + '</td>' +
@@ -1042,7 +1042,7 @@
             charts.reachVsImp = new Chart(reachVsImpCtx, {
                 type: 'line',
                 data: {
-                    labels: sortedByDate.map(d => d['Post Date']),
+                    labels: sortedByDate.map(d => (d['Post Date'] || '').split('T')[0]),
                     datasets: [
                         {
                             label: 'Reach',
@@ -1298,7 +1298,7 @@
 
                 return '<tr>' +
                     '<td>' + (p['Influencer Name'] || '-') + '</td>' +
-                    '<td>' + (p['Post Date'] || '-') + '</td>' +
+                    '<td>' + ((p['Post Date'] || '-').split('T')[0]) + '</td>' +
                     '<td>' + (p['Content Type'] || '-') + '</td>' +
                     '<td>' + ((p['Hashtags'] || '').split(',').length) + '</td>' +
                     '<td>' + captionLength + ' chars</td>' +
