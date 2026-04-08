@@ -1,1 +1,1322 @@
-placeholder
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityFurnish Influencer Marketing Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #F5F5F5;
+            color: #222222;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+        }
+
+        /* LOGIN MODAL */
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #6C5CE7 0%, #5F3DC4 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .login-modal.hidden {
+            display: none;
+        }
+
+        .login-container {
+            background: white;
+            padding: 48px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-container h1 {
+            font-size: 32px;
+            color: #222222;
+            margin-bottom: 12px;
+        }
+
+        .login-container p {
+            color: #666666;
+            margin-bottom: 32px;
+            font-size: 14px;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: #6C5CE7;
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 12px;
+            background-color: #F5C518;
+            color: #222222;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .login-button:hover {
+            background-color: #E5B500;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 197, 24, 0.3);
+        }
+
+        .login-error {
+            color: #E74C3C;
+            font-size: 12px;
+            margin-top: -12px;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        /* HEADER & NAVIGATION */
+        header {
+            background-color: #222222;
+            color: white;
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-center {
+            display: flex;
+            gap: 32px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .nav-tab {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 12px;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .nav-tab:hover {
+            color: #F5C518;
+        }
+
+        .nav-tab.active {
+            color: #6C5CE7;
+        }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -16px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: #6C5CE7;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 12px;
+        }
+
+        .last-updated {
+            color: #AAAAAA;
+        }
+
+        /* LOADING SPINNER */
+        .spinner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .spinner-overlay.hidden {
+            display: none;
+        }
+
+        .spinner {
+            border: 4px solid #E0E0E0;
+            border-top: 4px solid #6C5CE7;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ERROR STATE */
+        .error-container {
+            text-align: center;
+            padding: 64px 32px;
+        }
+
+        .error-container h2 {
+            color: #E74C3C;
+            margin-bottom: 12px;
+        }
+
+        .error-container p {
+            color: #666666;
+            margin-bottom: 24px;
+        }
+
+        .retry-button {
+            padding: 12px 32px;
+            background-color: #6C5CE7;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .retry-button:hover {
+            background-color: #5F3DC4;
+            transform: translateY(-2px);
+        }
+
+        /* MAIN CONTENT */
+        .content-area {
+            padding: 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* OVERVIEW TAB */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .card-label {
+            color: #666666;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .card-value {
+            color: #222222;
+            font-family: 'Poppins', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .charts-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .chart-container h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #222222;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        /* INFLUENCERS TAB */
+        .influencer-list-view, .influencer-profile-view {
+            display: none;
+        }
+
+        .influencer-list-view.active, .influencer-profile-view.active {
+            display: block;
+        }
+
+        .search-bar {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px 16px;
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+            margin-bottom: 32px;
+            font-size: 14px;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: #6C5CE7;
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+        }
+
+        .influencer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .influencer-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .influencer-card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+            transform: translateY(-4px);
+        }
+
+        .influencer-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6C5CE7 0%, #5F3DC4 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 28px;
+            margin-bottom: 16px;
+        }
+
+        .influencer-name {
+            font-family: 'Poppins', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            color: #222222;
+            margin-bottom: 8px;
+        }
+
+        .influencer-badge {
+            display: inline-block;
+            background-color: #E8F0FE;
+            color: #6C5CE7;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .influencer-stats {
+            font-size: 13px;
+            color: #666666;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .view-profile-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #F5C518;
+            color: #222222;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .view-profile-btn:hover {
+            background-color: #E5B500;
+            transform: translateY(-2px);
+        }
+
+        /* PROFILE VIEW */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #6C5CE7;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            color: #5F3DC4;
+            transform: translateX(-4px);
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .profile-stat {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .profile-stat-label {
+            color: #666666;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .profile-stat-value {
+            font-family: 'Poppins', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #222222;
+        }
+
+        /* POSTS TABLE */
+        .posts-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .posts-section h3 {
+            margin-bottom: 20px;
+            color: #222222;
+        }
+
+        .posts-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .posts-table th {
+            background-color: #F5F5F5;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #222222;
+            font-size: 13px;
+            border-bottom: 2px solid #E0E0E0;
+        }
+
+        .posts-table td {
+            padding: 12px;
+            border-bottom: 1px solid #E0E0E0;
+            font-size: 13px;
+        }
+
+        .posts-table tr:hover {
+            background-color: #F9F9F9;
+        }
+
+        .utm-link {
+            color: #6C5CE7;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .utm-link:hover {
+            text-decoration: underline;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background-color: #D4EDDA;
+            color: #155724;
+        }
+
+        .status-pending {
+            background-color: #FFF3CD;
+            color: #856404;
+        }
+
+        /* SUGGESTIONS TAB */
+        .suggestions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+        }
+
+        .suggestion-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #6C5CE7;
+        }
+
+        .suggestion-card.action {
+            border-left-color: #F5C518;
+        }
+
+        .suggestion-card.success {
+            border-left-color: #27AE60;
+        }
+
+        .suggestion-card h3 {
+            font-size: 16px;
+            margin-bottom: 16px;
+            color: #222222;
+        }
+
+        .suggestion-item {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #E0E0E0;
+        }
+
+        .suggestion-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .suggestion-title {
+            font-weight: 600;
+            color: #222222;
+            margin-bottom: 8px;
+        }
+
+        .suggestion-detail {
+            color: #666666;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-center {
+                gap: 16px;
+            }
+
+            .influencer-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-wrap: wrap;
+                gap: 16px;
+            }
+
+            .nav-center {
+                width: 100%;
+                gap: 8px;
+                order: 3;
+            }
+
+            .nav-right {
+                flex-direction: column;
+                align-items: flex-start;
+                font-size: 11px;
+            }
+
+            .content-area {
+                padding: 16px;
+            }
+
+            .summary-cards {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+            }
+
+            .card-value {
+                font-size: 24px;
+            }
+
+            .influencer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .posts-table {
+                font-size: 12px;
+            }
+
+            .posts-table th, .posts-table td {
+                padding: 8px;
+            }
+
+            .suggestions-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 32px;
+            color: #999999;
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN MODAL -->
+    <div id="loginModal" class="login-modal">
+        <div class="login-container">
+            <h1>cityfurnish</h1>
+            <p>Influencer Marketing Dashboard</p>
+            <input type="password" id="passwordInput" class="login-input" placeholder="Enter password" autocomplete="off">
+            <div class="login-error" id="loginError">Incorrect password</div>
+            <button class="login-button" onclick="handleLogin()">Access Dashboard</button>
+        </div>
+    </div>
+
+    <!-- LOADING SPINNER -->
+    <div id="loadingSpinner" class="spinner-overlay hidden">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- HEADER -->
+    <header>
+        <div class="logo">cityfurnish</div>
+        <nav class="nav-center">
+            <button class="nav-tab active" onclick="switchTab('overview')">Overview</button>
+            <button class="nav-tab" onclick="switchTab('influencers')">Influencers</button>
+            <button class="nav-tab" onclick="switchTab('suggestions')">Suggestions</button>
+        </nav>
+        <div class="nav-right">
+            <div class="last-updated">Updated: <span id="lastUpdated">--:--</span></div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <div class="content-area">
+        <!-- TAB 1: OVERVIEW -->
+        <div id="overviewTab" class="tab-content active">
+            <div class="summary-cards" id="summaryCards"></div>
+            <div class="charts-row">
+                <div class="chart-container">
+                    <h3>Monthly Reach Trend</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="reachTrendChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h3>Content Type Breakdown</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="contentTypeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <h3>Top 10 Posts by Reach</h3>
+                <div class="chart-wrapper" style="height: 350px;">
+                    <canvas id="topPostsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: INFLUENCERS -->
+        <div id="influencersTab" class="tab-content">
+            <div class="influencer-list-view active">
+                <input type="text" id="searchInput" class="search-bar" placeholder="Search influencers...">
+                <div class="influencer-grid" id="influencerGrid"></div>
+            </div>
+            <div class="influencer-profile-view">
+                <button class="back-button" onclick="backToInfluencerList()">← All Influencers</button>
+                <div id="profileContent"></div>
+            </div>
+        </div>
+
+        <!-- TAB 3: SUGGESTIONS -->
+        <div id="suggestionsTab" class="tab-content">
+            <div class="suggestions-grid" id="suggestionsGrid"></div>
+        </div>
+
+        <!-- ERROR STATE -->
+        <div id="errorContainer" style="display: none;">
+            <div class="error-container">
+                <h2>Failed to Load Data</h2>
+                <p id="errorMessage">An error occurred while fetching the data. Please try again.</p>
+                <button class="retry-button" onclick="retryLoad()">Retry</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // STATE VARIABLES
+        let isAuthenticated = false;
+        let dashboardData = null;
+        let currentInfluencer = null;
+        let allCharts = [];
+
+        // CONSTANTS
+        const CORRECT_PASSWORD = 'Influencer@cityfurnish123';
+        const API_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxxTKjsL_dqyoCBgPPjz-aY9QnKX5P4iTVGW0UegrhBpHYNmIwSWyN52IeqFGL2Ugri/exec';
+        const AUTO_REFRESH_INTERVAL = 10 * 60 * 1000; // 10 minutes
+
+        // UTILITIES
+        function formatIndianNumber(num) {
+            if (!num && num !== 0) return '--';
+            const numStr = Math.round(num).toString();
+            if (numStr.length <= 3) return numStr;
+            let result = '';
+            let counter = 0;
+            for (let i = numStr.length - 1; i >= 0; i--) {
+                if (counter === 2 || (counter > 2 && (numStr.length - i - 1) % 2 === 0)) {
+                    result = ',' + result;
+                }
+                result = numStr[i] + result;
+                counter++;
+            }
+            return result;
+        }
+
+        function updateLastUpdatedTime() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+            document.getElementById('lastUpdated').textContent = time;
+        }
+
+        // LOGIN
+        function handleLogin() {
+            const password = document.getElementById('passwordInput').value;
+            const errorEl = document.getElementById('loginError');
+
+            if (password === CORRECT_PASSWORD) {
+                isAuthenticated = true;
+                document.getElementById('loginModal').classList.add('hidden');
+                errorEl.style.display = 'none';
+                loadDashboardData();
+            } else {
+                errorEl.style.display = 'block';
+                document.getElementById('passwordInput').value = '';
+            }
+        }
+
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !isAuthenticated) {
+                handleLogin();
+            }
+        });
+
+        // DATA LOADING
+        async function loadDashboardData() {
+            document.getElementById('loadingSpinner').classList.remove('hidden');
+            document.getElementById('errorContainer').style.display = 'none';
+
+            try {
+                const response = await fetch(API_ENDPOINT);
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                dashboardData = data;
+                updateLastUpdatedTime();
+                renderDashboard();
+                document.getElementById('loadingSpinner').classList.add('hidden');
+            } catch (error) {
+                console.error('Data load error:', error);
+                document.getElementById('loadingSpinner').classList.add('hidden');
+                document.getElementById('errorContainer').style.display = 'block';
+                document.getElementById('errorMessage').textContent = error.message || 'Failed to load dashboard data. Please check your connection and try again.';
+            }
+        }
+
+        function retryLoad() {
+            loadDashboardData();
+        }
+
+        // RENDER DASHBOARD
+        function renderDashboard() {
+            if (!dashboardData) return;
+
+            renderOverviewTab();
+            renderInfluencersTab();
+            renderSuggestionsTab();
+        }
+
+        function renderOverviewTab() {
+            const { instagramMetrics = [], ga4Campaigns = [] } = dashboardData;
+
+            // Calculate summary stats
+            const totalInfluencers = new Set(dashboardData.posts?.map(p => p['Influencer Name'])).size || 0;
+            const totalPosts = instagramMetrics.length;
+            const avgEngagement = totalPosts > 0 ? (instagramMetrics.reduce((sum, p) => sum + (parseFloat(p['Engagement Rate %']) || 0), 0) / totalPosts).toFixed(2) : 0;
+            const totalReach = instagramMetrics.reduce((sum, p) => sum + (parseInt(p['Reach']) || 0), 0);
+            const totalImpressions = instagramMetrics.reduce((sum, p) => sum + (parseInt(p['Impressions']) || 0), 0);
+            const totalSessions = ga4Campaigns.reduce((sum, c) => sum + (parseInt(c['Sessions']) || 0), 0);
+
+            const cardsHTML = `
+                <div class="card">
+                    <div class="card-label">Total Influencers Tracked</div>
+                    <div class="card-value">${totalInfluencers}</div>
+                </div>
+                <div class="card">
+                    <div class="card-label">Total IG Posts</div>
+                    <div class="card-value">${totalPosts}</div>
+                </div>
+                <div class="card">
+                    <div class="card-label">Avg Engagement Rate</div>
+                    <div class="card-value">${avgEngagement}%</div>
+                </div>
+                <div class="card">
+                    <div class="card-label">Total Reach</div>
+                    <div class="card-value">${formatIndianNumber(totalReach)}</div>
+                </div>
+                <div class="card">
+                    <div class="card-label">Total Impressions</div>
+                    <div class="card-value">${formatIndianNumber(totalImpressions)}</div>
+                </div>
+                <div class="card">
+                    <div class="card-label">Total Sessions (GA4)</div>
+                    <div class="card-value">${formatIndianNumber(totalSessions)}</div>
+                </div>
+            `;
+
+            document.getElementById('summaryCards').innerHTML = cardsHTML;
+
+            // Charts
+            renderReachTrendChart();
+            renderContentTypeChart();
+            renderTopPostsChart();
+        }
+
+        function renderReachTrendChart() {
+            const { instagramMetrics = [] } = dashboardData;
+            const monthlyData = {};
+
+            instagramMetrics.forEach(post => {
+                if (post['Post Date']) {
+                    const date = new Date(post['Post Date']);
+                    const monthKey = date.toLocaleString('en-IN', { month: 'short', year: 'numeric' });
+                    monthlyData[monthKey] = (monthlyData[monthKey] || 0) + (parseInt(post['Reach']) || 0);
+                }
+            });
+
+            const months = Object.keys(monthlyData);
+            const reaches = Object.values(monthlyData);
+
+            const ctx = document.getElementById('reachTrendChart').getContext('2d');
+            const existingChart = allCharts.find(c => c.canvas.id === 'reachTrendChart');
+            if (existingChart) existingChart.destroy();
+
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Reach',
+                        data: reaches,
+                        borderColor: '#6C5CE7',
+                        backgroundColor: 'rgba(108, 92, 231, 0.05)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            allCharts.push(chart);
+        }
+
+        function renderContentTypeChart() {
+            const { instagramMetrics = [] } = dashboardData;
+            const contentTypes = {};
+
+            instagramMetrics.forEach(post => {
+                const type = post['Media Type'] || 'Unknown';
+                contentTypes[type] = (contentTypes[type] || 0) + 1;
+            });
+
+            const labels = Object.keys(contentTypes);
+            const data = Object.values(contentTypes);
+            const colors = ['#6C5CE7', '#F5C518', '#27AE60', '#E74C3C'];
+
+            const ctx = document.getElementById('contentTypeChart').getContext('2d');
+            const existingChart = allCharts.find(c => c.canvas.id === 'contentTypeChart');
+            if (existingChart) existingChart.destroy();
+
+            const chart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors.slice(0, labels.length)
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            allCharts.push(chart);
+        }
+
+        function renderTopPostsChart() {
+            const { instagramMetrics = [] } = dashboardData;
+            const topPosts = instagramMetrics
+                .sort((a, b) => (parseInt(b['Reach']) || 0) - (parseInt(a['Reach']) || 0))
+                .slice(0, 10);
+
+            const labels = topPosts.map(p => (p['Caption'] || 'Post').substring(0, 20) + '...');
+            const reaches = topPosts.map(p => parseInt(p['Reach']) || 0);
+
+            const ctx = document.getElementById('topPostsChart').getContext('2d');
+            const existingChart = allCharts.find(c => c.canvas.id === 'topPostsChart');
+            if (existingChart) existingChart.destroy();
+
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Reach',
+                        data: reaches,
+                        backgroundColor: '#6C5CE7'
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { beginAtZero: true }
+                    }
+                }
+            });
+
+            allCharts.push(chart);
+        }
+
+        function renderInfluencersTab() {
+            const { posts = [] } = dashboardData;
+            const influencers = {};
+
+            posts.forEach(post => {
+                const name = post['Influencer Name'];
+                if (name) {
+                    if (!influencers[name]) {
+                        influencers[name] = {
+                            name: name,
+                            posts: [],
+                            status: 'Active'
+                        };
+                    }
+                    influencers[name].posts.push(post);
+                    influencers[name].status = post['Status'] || 'Active';
+                }
+            });
+
+            const influencerList = Object.values(influencers);
+
+            const gridHTML = influencerList.map((inf, idx) => {
+                const initials = inf.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                const lastPost = inf.posts[inf.posts.length - 1]?.['Post Date'] || 'N/A';
+
+                return `
+                    <div class="influencer-card" onclick="viewInfluencerProfile('${inf.name}')">
+                        <div class="influencer-avatar">${initials}</div>
+                        <div class="influencer-name">${inf.name}</div>
+                        <span class="influencer-badge">Instagram</span>
+                        <div class="influencer-stats">
+                            <div><strong>${inf.posts.length}</strong> Posts</div>
+                            <div>Status: <strong>${inf.status}</strong></div>
+                            <div>Last Post: <strong>${lastPost}</strong></div>
+                        </div>
+                        <button class="view-profile-btn">View Profile</button>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('influencerGrid').innerHTML = gridHTML || '<div class="no-data">No influencers found</div>';
+
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                const filtered = influencerList.filter(inf => inf.name.toLowerCase().includes(query));
+
+                const filteredHTML = filtered.map(inf => {
+                    const initials = inf.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                    return `
+                        <div class="influencer-card" onclick="viewInfluencerProfile('${inf.name}')">
+                            <div class="influencer-avatar">${initials}</div>
+                            <div class="influencer-name">${inf.name}</div>
+                            <span class="influencer-badge">Instagram</span>
+                            <div class="influencer-stats">
+                                <div><strong>${inf.posts.length}</strong> Posts</div>
+                                <div>Status: <strong>${inf.status}</strong></div>
+                            </div>
+                            <button class="view-profile-btn">View Profile</button>
+                        </div>
+                    `;
+                }).join('');
+
+                document.getElementById('influencerGrid').innerHTML = filteredHTML || '<div class="no-data">No influencers found</div>';
+            });
+        }
+
+        function viewInfluencerProfile(influencerName) {
+            currentInfluencer = influencerName;
+            const { posts = [], ga4Campaigns = [] } = dashboardData;
+            const influencerPosts = posts.filter(p => p['Influencer Name'] === influencerName);
+
+            if (influencerPosts.length === 0) {
+                document.getElementById('profileContent').innerHTML = '<div class="no-data">No posts found for this influencer</div>';
+                document.querySelector('.influencer-profile-view').classList.add('active');
+                document.querySelector('.influencer-list-view').classList.remove('active');
+                return;
+            }
+
+            const platforms = new Set(influencerPosts.map(p => p['Platform']));
+            const contentTypes = new Set(influencerPosts.map(p => p['Content Type']));
+            const dates = influencerPosts.map(p => new Date(p['Post Date'])).sort((a, b) => a - b);
+            const dateRange = dates.length > 0 ? `${dates[0].toLocaleDateString('en-IN')} - ${dates[dates.length - 1].toLocaleDateString('en-IN')}` : 'N/A';
+
+            let profileHTML = `
+                <div class="profile-stats">
+                    <div class="profile-stat">
+                        <div class="profile-stat-label">Total Posts</div>
+                        <div class="profile-stat-value">${influencerPosts.length}</div>
+                    </div>
+                    <div class="profile-stat">
+                        <div class="profile-stat-label">Platforms</div>
+                        <div class="profile-stat-value">${platforms.size}</div>
+                    </div>
+                    <div class="profile-stat">
+                        <div class="profile-stat-label">Content Types</div>
+                        <div class="profile-stat-value">${contentTypes.size}</div>
+                    </div>
+                    <div class="profile-stat">
+                        <div class="profile-stat-label">Date Range</div>
+                        <div class="profile-stat-value" style="font-size: 12px;">${dateRange}</div>
+                    </div>
+                </div>
+            `;
+
+            profileHTML += `
+                <div class="posts-section">
+                    <h3>Posts</h3>
+                    <table class="posts-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Platform</th>
+                                <th>Type</th>
+                                <th>UTM Link</th>
+                                <th>Caption</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            influencerPosts.forEach(post => {
+                const statusClass = post['Status'] === 'Active' ? 'status-active' : 'status-pending';
+                const utmLink = post['UTM Link'] || 'N/A';
+                const caption = (post['Caption'] || 'N/A').substring(0, 30) + '...';
+
+                profileHTML += `
+                    <tr>
+                        <td>${post['Post Date'] || 'N/A'}</td>
+                        <td>${post['Platform'] || 'N/A'}</td>
+                        <td>${post['Content Type'] || 'N/A'}</td>
+                        <td>${utmLink !== 'N/A' ? `<a href="${utmLink}" target="_blank" class="utm-link">View</a>` : 'N/A'}</td>
+                        <td>${caption}</td>
+                        <td><span class="status-badge ${statusClass}">${post['Status'] || 'N/A'}</span></td>
+                    </tr>
+                `;
+            });
+
+            profileHTML += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            document.getElementById('profileContent').innerHTML = profileHTML;
+            document.querySelector('.influencer-profile-view').classList.add('active');
+            document.querySelector('.influencer-list-view').classList.remove('active');
+        }
+
+        function backToInfluencerList() {
+            currentInfluencer = null;
+            document.querySelector('.influencer-profile-view').classList.remove('active');
+            document.querySelector('.influencer-list-view').classList.add('active');
+        }
+
+        function renderSuggestionsTab() {
+            const { instagramMetrics = [], posts = [] } = dashboardData;
+
+            let suggestionsHTML = '';
+
+            // Best Performing Content
+            const topContent = instagramMetrics
+                .sort((a, b) => (parseInt(b['Reach']) || 0) - (parseInt(a['Reach']) || 0))
+                .slice(0, 3);
+
+            suggestionsHTML += '<div class="suggestion-card success">';
+            suggestionsHTML += '<h3>Best Performing Content</h3>';
+            topContent.forEach(post => {
+                const reach = parseInt(post['Reach']) || 0;
+                const mediaType = post['Media Type'] || 'Content';
+                suggestionsHTML += `
+                    <div class="suggestion-item">
+                        <div class="suggestion-title">${mediaType} - ${formatIndianNumber(reach)} reach</div>
+                        <div class="suggestion-detail">Post on ${post['Post Date'] || 'recent date'}. Continue this content strategy for better engagement.</div>
+                    </div>
+                `;
+            });
+            suggestionsHTML += '</div>';
+
+            // Hashtag Performance
+            const hashtagData = {};
+            instagramMetrics.forEach(post => {
+                if (post['Hashtags']) {
+                    const hashtags = post['Hashtags'].split(/\s+/).filter(h => h.startsWith('#'));
+                    const engagement = parseFloat(post['Engagement Rate %']) || 0;
+                    hashtags.forEach(tag => {
+                        if (!hashtagData[tag]) hashtagData[tag] = { count: 0, totalEngagement: 0 };
+                        hashtagData[tag].count += 1;
+                        hashtagData[tag].totalEngagement += engagement;
+                    });
+                }
+            });
+
+            const topHashtags = Object.entries(hashtagData)
+                .map(([tag, data]) => ({ tag, avgEngagement: data.totalEngagement / data.count }))
+                .sort((a, b) => b.avgEngagement - a.avgEngagement)
+                .slice(0, 10);
+
+            suggestionsHTML += '<div class="suggestion-card">';
+            suggestionsHTML += '<h3>Top Hashtag Performance</h3>';
+            topHashtags.forEach(item => {
+                suggestionsHTML += `
+                    <div class="suggestion-item">
+                        <div class="suggestion-title">${item.tag}</div>
+                        <div class="suggestion-detail">Avg engagement: ${item.avgEngagement.toFixed(2)}%</div>
+                    </div>
+                `;
+            });
+            suggestionsHTML += '</div>';
+
+            // Influencer Recommendations
+            const influencerActivity = {};
+            posts.forEach(post => {
+                const name = post['Influencer Name'];
+                if (name) {
+                    if (!influencerActivity[name]) {
+                        influencerActivity[name] = { posts: 0, status: 'Active' };
+                    }
+                    influencerActivity[name].posts += 1;
+                    influencerActivity[name].status = post['Status'];
+                }
+            });
+
+            const activeInfluencers = Object.entries(influencerActivity)
+                .sort((a, b) => b[1].posts - a[1].posts)
+                .slice(0, 5);
+
+            const pendingInfluencers = Object.entries(influencerActivity)
+                .filter(([_, data]) => data.status === 'Pending')
+                .slice(0, 3);
+
+            suggestionsHTML += '<div class="suggestion-card action">';
+            suggestionsHTML += '<h3>Influencer Recommendations</h3>';
+            suggestionsHTML += '<div class="suggestion-item"><div class="suggestion-title">Most Active</div>';
+            activeInfluencers.forEach(([name, data]) => {
+                suggestionsHTML += `<div class="suggestion-detail">${name} - ${data.posts} posts</div>`;
+            });
+            suggestionsHTML += '</div>';
+            if (pendingInfluencers.length > 0) {
+                suggestionsHTML += '<div class="suggestion-item"><div class="suggestion-title">Need Follow-up</div>';
+                pendingInfluencers.forEach(([name]) => {
+                    suggestionsHTML += `<div class="suggestion-detail">Contact ${name} for collaboration status</div>`;
+                });
+                suggestionsHTML += '</div>';
+            }
+            suggestionsHTML += '</div>';
+
+            // Content Gap Analysis
+            const contentTypeEngagement = {};
+            instagramMetrics.forEach(post => {
+                const type = post['Media Type'] || 'Unknown';
+                if (!contentTypeEngagement[type]) {
+                    contentTypeEngagement[type] = { count: 0, totalEngagement: 0 };
+                }
+                contentTypeEngagement[type].count += 1;
+                contentTypeEngagement[type].totalEngagement += parseFloat(post['Engagement Rate %']) || 0;
+            });
+
+            suggestionsHTML += '<div class="suggestion-card">';
+            suggestionsHTML += '<h3>Content Gap Analysis</h3>';
+            Object.entries(contentTypeEngagement).forEach(([type, data]) => {
+                const avgEngagement = (data.totalEngagement / data.count).toFixed(2);
+                suggestionsHTML += `
+                    <div class="suggestion-item">
+                        <div class="suggestion-title">${type}</div>
+                        <div class="suggestion-detail">${data.count} posts | Avg engagement: ${avgEngagement}%</div>
+                    </div>
+                `;
+            });
+            suggestionsHTML += '</div>';
+
+            document.getElementById('suggestionsGrid').innerHTML = suggestionsHTML;
+        }
+
+        // TAB SWITCHING
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.nav-tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
+        // INITIALIZATION
+        updateLastUpdatedTime();
+        setInterval(updateLastUpdatedTime, 60000);
+        setInterval(() => {
+            if (isAuthenticated) loadDashboardData();
+        }, AUTO_REFRESH_INTERVAL);
+    </script>
+</body>
+</html>
